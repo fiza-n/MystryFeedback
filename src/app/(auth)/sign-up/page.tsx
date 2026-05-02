@@ -32,7 +32,7 @@ import { error } from 'console'
 
 
 
-export default function SignInPage() {
+export default function SignUpPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ username, setUsername] = useState('')
@@ -105,7 +105,7 @@ useEffect(()=>{
           </p>
         </div>
 
-        {/* Sign In Card */}
+        {/* Sign up Card */}
         <Card className="w-full shadow-lg">
           <CardHeader className="space-y-2">
             <CardTitle className="text-lg sm:text-xl">Sign Up</CardTitle>
