@@ -16,9 +16,10 @@ import { useDebounceValue } from 'usehooks-ts'
 import axios, {AxiosError} from 'axios'
 import { ApiResponse } from '@/src/types/ApiResponse'
 import { error } from 'console'
+import { Loader2 } from 'lucide-react'
 
 /**
- * Sign In Page
+ * Sign up Page
  * Mobile-responsive authentication form with accessibility support
  * 
  * @accessibility
@@ -99,9 +100,9 @@ useEffect(()=>{
       <div className="w-full max-w-md space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Good to see you!</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Join Mystery Message</h1>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Sign Up
+          Sign up to start your anonymous adventure
           </p>
         </div>
 
@@ -122,21 +123,42 @@ useEffect(()=>{
                   htmlFor="identifier"
                   className="block text-sm font-medium text-foreground"
                 >
-                  Username or Email
+                  Username
                   <span className="text-destructive ml-1" aria-label="required">
                     *
                   </span>
                 </label>
                 <Input
                   id="identifier"
-                  placeholder="Enter your username or email"
+                  placeholder="Enter your username"
                   type="text"
                   disabled={isSubmitting}
                   autoComplete="username"
                   aria-invalid={!!errors.username}
                   aria-describedby={errors.username ? 'identifier-error' : undefined}
                   className="h-10 sm:h-11 text-base sm:text-sm rounded-lg"
-                  {...register('username')}
+                  {...register('username', {
+                    onChange: (e) => setUsername(e.target.value),
+                  })}
+                />
+                   <label
+                  htmlFor="identifier"
+                  className="block text-sm font-medium text-foreground"
+                >
+                  Email
+                  <span className="text-destructive ml-1" aria-label="required">
+                    *
+                  </span>
+                </label>
+                  <Input
+                  id="identifier"
+                  placeholder="Enter your email"
+                  type="text"
+                  disabled={isSubmitting}
+                  autoComplete="Email"
+                  aria-invalid={!!errors.username}
+                  aria-describedby={errors.username ? 'identifier-error' : undefined}
+                  className="h-10 sm:h-11 text-base sm:text-sm rounded-lg"
                 />
                 {errors.username && (
                   <p
@@ -194,7 +216,7 @@ useEffect(()=>{
                 {isSubmitting ? (
                   <>
                     <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
-                    Creating account...
+                  <Loader2 className="m4-2 h-4 w-4 animate-spin" size={16} /> Please wait
                   </>
                 ) : (
                   'Sign Up'
@@ -216,7 +238,7 @@ useEffect(()=>{
             <p className="text-center text-xs sm:text-sm text-muted-foreground">
               Already have an account?{' '}
               <Link
-                href="/sign-up"
+                href="/sign-in"
                 className="font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 rounded px-1"
               >
                 Sign In
