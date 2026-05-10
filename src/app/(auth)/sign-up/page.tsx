@@ -141,6 +141,7 @@ useEffect(()=>{
                     onChange: (e) => setUsername(e.target.value),
                   })}
                 />
+                {isCheckingUsername && <Loader2 className='animate-spin'/>}
                    <label
                   htmlFor="identifier"
                   className="block text-sm font-medium text-foreground"
