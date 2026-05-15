@@ -12,7 +12,7 @@ import { Button } from '@/src/components/ui/button'
 import { Input } from '@/src/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card'
 import { signUpSchema } from '@/src/Schema/signUpSchema'
-import { useDebounceValue } from 'usehooks-ts'
+import { useDebounceValue, useDebounceCallback } from 'usehooks-ts'
 import axios, {AxiosError} from 'axios'
 import { ApiResponse } from '@/src/types/ApiResponse'
 import { error } from 'console'
@@ -40,6 +40,7 @@ export default function SignUpPage() {
   const [isCheckingUsername, setIsCheckingUsername] = useState(false)
   const [ usernameMessage, setUsernameMessage] = useState('')
  const debouncedUsername = useDebounceValue(username,300)
+ const debounced = useDebounceCallback(setUsername,300);
 
   const {
     register,
@@ -56,11 +57,11 @@ export default function SignUpPage() {
   })
 useEffect(()=>{
   const checkUsernameUnique = async () => {
-    if(debouncedUsername){
+    if(username){
       setIsCheckingUsername(true)
       setUsernameMessage('')
       try {
-       const response =  await axios.get(`/api/check-username-uniqueness?username=${debouncedUsername}`)
+       const response =  await axios.get(`/api/check-username-uniqueness?username=${username}`)
        setUsernameMessage(response.data.message)
       } catch (error) {
         const axiosError = error as AxiosError<ApiResponse>
@@ -73,7 +74,7 @@ useEffect(()=>{
     }
   }
   checkUsernameUnique();
-},[debouncedUsername])
+},[username])
 
   const onSubmit = async (data: z.infer<typeof signUpSchema> ) => {
     setIsSubmitting(true)
@@ -82,7 +83,7 @@ useEffect(()=>{
       toast.success('Success',{
         description: result.data.message
       })
-      router.replace(`/verify-code/${data.username}`)
+      router.replace(`/verify/${data.username}`)
       reset()
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>
@@ -138,7 +139,7 @@ useEffect(()=>{
                   aria-describedby={errors.username ? 'identifier-error' : undefined}
                   className="h-10 sm:h-11 text-base sm:text-sm rounded-lg"
                   {...register('username', {
-                    onChange: (e) => setUsername(e.target.value),
+                    onChange: (e) => debounced(e.target.value),
                   })}
                 />
                 {isCheckingUsername && <Loader2 className='animate-spin'/>}
@@ -155,20 +156,21 @@ useEffect(()=>{
                   id="identifier"
                   placeholder="Enter your email"
                   type="text"
+                   {...register('email')} 
                   disabled={isSubmitting}
                   autoComplete="Email"
-                  aria-invalid={!!errors.username}
-                  aria-describedby={errors.username ? 'identifier-error' : undefined}
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? 'identifier-error' : undefined}
                   className="h-10 sm:h-11 text-base sm:text-sm rounded-lg"
                 />
-                {errors.username && (
+                {errors.email && (
                   <p
                     id="identifier-error"
                     className="text-xs sm:text-sm text-destructive font-medium flex items-center gap-1"
                     role="alert"
                   >
                     <span aria-hidden="true">⚠</span>
-                    {errors.username.message}
+                    {errors.email.message}
                   </p>
                 )}
               </div>

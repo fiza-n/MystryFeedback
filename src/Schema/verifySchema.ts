@@ -1,6 +1,6 @@
-import {z} from "zod";
+// verifySchema.ts
+import { z } from "zod"
 
 export const verifySchema = z.object({
-    email: z.string(),
-    password: z.string()
+    code: z.string().length(6, "Code must be 6 digits") 
 })

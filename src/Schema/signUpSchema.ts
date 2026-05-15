@@ -6,10 +6,7 @@ export const usernameValidation = z
 .max(20, "Username must be less than 20 characters")
 .regex(/^[a-zA-Z0-9]+$/, "Username must not contain special characters");
 
-export const emailValidation = z.
-string()
-.includes("@", "Email must contain @ symbol")
-.endsWith(".com", "Email must end with .com domain");
+
 
 export const passwordValidation = z
 .string()
@@ -19,6 +16,6 @@ export const passwordValidation = z
 export const signUpSchema = z.object({
     username: usernameValidation,
     password: passwordValidation,
-    email: emailValidation
+   email: z.string().email("Please provide a valid email")
 
 })

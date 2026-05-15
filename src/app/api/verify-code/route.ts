@@ -1,32 +1,38 @@
 import UserModel from "../../../model/User";
 import { z } from "zod";
 import dbConnect from "../../../lib/dbConnect";
-import { signInSchema } from "../../../Schema/signInSchema";
-
-const VerifyCodeSchema = z.object({
-  verifyCode: signInSchema,
-});
 
 export async function POST(request: Request) {
   await dbConnect();
 
   try {
-    const { username, code } = await request.json();
+   const { username, code } = await request.json();
 
-    //validate with zod
 
-    const result = VerifyCodeSchema.safeParse({code});
 
-    if(!result.success){
-      return Response.json({
+const codeValidation = z.string().length(6).safeParse(code)
+
+
+if(!codeValidation.success){
+    console.log("Zod errors:", codeValidation.error.format())
+    return Response.json({
         success: false,
         message: 'Invalid code'
-      },{
-        status: 400
-      })
-    }
-    const decodedUsername = decodeURIComponent(username);
-    const user = await UserModel.findOne({ username: decodedUsername });
+    },{ status: 400 })
+}
+
+const decodedUsername = decodeURIComponent(username);
+const user = await UserModel.findOne({ username: decodedUsername });
+
+console.log("=== CODE COMPARISON ===")
+console.log("DB code:", user?.verifyCode)
+console.log("DB code type:", typeof user?.verifyCode)
+console.log("Entered code:", code)
+console.log("Entered code type:", typeof code)
+console.log("Strict equal ===:", user?.verifyCode === code)
+console.log("Loose equal ==:", user?.verifyCode == code)
+console.log("=======================")
+
 
     if (!user) {
       return Response.json(
