@@ -11,7 +11,7 @@ import { signIn } from 'next-auth/react'
 import { Button } from '@/src/components/ui/button'
 import { Input } from '@/src/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card'
-import { signUpSchema } from '@/src/Schema/signUpSchema'
+import { signInSchema } from '@/src/Schema/signInSchema'
 import { useDebounceValue, useDebounceCallback } from 'usehooks-ts'
 import axios, {AxiosError} from 'axios'
 import { ApiResponse } from '@/src/types/ApiResponse'
@@ -36,63 +36,43 @@ import { Loader2 } from 'lucide-react'
 export default function SignUpPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [ username, setUsername] = useState('')
-  const [isCheckingUsername, setIsCheckingUsername] = useState(false)
-  const [ usernameMessage, setUsernameMessage] = useState('')
- const debouncedUsername = useDebounceValue(username,300)
- const debounced = useDebounceCallback(setUsername,300);
+
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<z.infer<typeof signUpSchema>>({
-    resolver: zodResolver(signUpSchema),
+  } = useForm<z.infer<typeof signInSchema>>({
+    resolver: zodResolver(signInSchema),
     defaultValues: {
-      username:'',
       email: '',
       password: '',
     },
   })
-useEffect(()=>{
-  const checkUsernameUnique = async () => {
-    if(username){
-      setIsCheckingUsername(true)
-      setUsernameMessage('')
-      try {
-       const response =  await axios.get(`/api/check-username-uniqueness?username=${username}`)
-       setUsernameMessage(response.data.message)
-      } catch (error) {
-        const axiosError = error as AxiosError<ApiResponse>
-        setUsernameMessage(axiosError.response?.data.message ?? 'Error while checking username')
-      }
-      finally{
-        setIsCheckingUsername(false)
-      }
 
-    }
-  }
-  checkUsernameUnique();
-},[username])
 
-  const onSubmit = async (data: z.infer<typeof signUpSchema> ) => {
-    setIsSubmitting(true)
-    try {
-      const result = await axios.post<ApiResponse>('/api/sign-up',data)
-      toast.success('Success',{
-        description: result.data.message
-      })
-      router.replace(`/verify/${data.username}`)
-      reset()
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiResponse>
-      toast.error('Sign Up Failed', {
-      description: axiosError.response?.data.message ?? 'Please try again later.',
-  })
-    } finally { 
-      setIsSubmitting(false)
-    }
+  const onSubmit = async (data: z.infer<typeof signInSchema> ) => {
+  const result =  await signIn( 'credentials', {
+    redirect: false,
+    identifier: data.email,
+    password: data.password
+   })
+
+   if(result?.error){
+    toast.error('Login failed' , {
+        description : 'Incorrect email or password'
+    })
+   }
+   else{
+    toast.success( ' Login successful' , {
+        description: 'Welcome back!'
+    })
+   }
+
+   if(result?.url) {
+    router.replace('/dashboard');
+   }
   }
 
   return (
@@ -101,16 +81,16 @@ useEffect(()=>{
       <div className="w-full max-w-md space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Join Mystery Feedback</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Welcome back to Mystery Feedback</h1>
           <p className="text-sm sm:text-base text-muted-foreground">
-          Sign up to start your anonymous adventure
+          Sign In to continue your anonymous adventure
           </p>
         </div>
 
         {/* Sign up Card */}
         <Card className="w-full shadow-lg">
           <CardHeader className="space-y-2">
-            <CardTitle className="text-lg sm:text-xl">Sign Up</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Sign In</CardTitle>
             <CardDescription className="text-xs sm:text-sm">
               Enter your username or email and password
             </CardDescription>
@@ -120,29 +100,7 @@ useEffect(()=>{
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5">
               {/* Username/Email Field */}
               <div className="space-y-2">
-                <label
-                  htmlFor="identifier"
-                  className="block text-sm font-medium text-foreground"
-                >
-                  Username
-                  <span className="text-destructive ml-1" aria-label="required">
-                    *
-                  </span>
-                </label>
-                <Input
-                  id="identifier"
-                  placeholder="Enter your username"
-                  type="text"
-                  disabled={isSubmitting}
-                  autoComplete="username"
-                  aria-invalid={!!errors.username}
-                  aria-describedby={errors.username ? 'identifier-error' : undefined}
-                  className="h-10 sm:h-11 text-base sm:text-sm rounded-lg"
-                  {...register('username', {
-                    onChange: (e) => debounced(e.target.value),
-                  })}
-                />
-                {isCheckingUsername && <Loader2 className='animate-spin'/>}
+
                    <label
                   htmlFor="identifier"
                   className="block text-sm font-medium text-foreground"
@@ -154,11 +112,11 @@ useEffect(()=>{
                 </label>
                   <Input
                   id="identifier"
-                  placeholder="Enter your email"
+                  placeholder="Enter your email or username"
                   type="text"
                    {...register('email')} 
                   disabled={isSubmitting}
-                  autoComplete="Email"
+                  autoComplete="Email" 
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? 'identifier-error' : undefined}
                   className="h-10 sm:h-11 text-base sm:text-sm rounded-lg"
@@ -222,7 +180,7 @@ useEffect(()=>{
                   <Loader2 className="m4-2 h-4 w-4 animate-spin" size={16} /> Please wait
                   </>
                 ) : (
-                  'Sign Up'
+                  'Sign In'
                 )}
               </Button>
             </form>
@@ -237,18 +195,26 @@ useEffect(()=>{
               </div>
             </div>
 
-            {/* Sign in Link */}
+            {/* Sign Up Link */}
             <p className="text-center text-xs sm:text-sm text-muted-foreground">
-              Already have an account?{' '}
+              New to MysteryFeedback?{' '}
               <Link
-                href="/sign-in"
+                href="/sign-up"
                 className="font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 rounded px-1"
               >
-                Sign In
+                Sign Up
               </Link>
             </p>
 
-          
+           
+            <p className="text-center text-xs sm:text-sm text-muted-foreground mt-3">
+              <Link
+                href="/forgot-password"
+                className="font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 rounded px-1"
+              >
+                Forgot Password?
+              </Link>
+            </p> 
           </CardContent>
         </Card>
 

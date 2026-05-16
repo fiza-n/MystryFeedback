@@ -24,14 +24,7 @@ if(!codeValidation.success){
 const decodedUsername = decodeURIComponent(username);
 const user = await UserModel.findOne({ username: decodedUsername });
 
-console.log("=== CODE COMPARISON ===")
-console.log("DB code:", user?.verifyCode)
-console.log("DB code type:", typeof user?.verifyCode)
-console.log("Entered code:", code)
-console.log("Entered code type:", typeof code)
-console.log("Strict equal ===:", user?.verifyCode === code)
-console.log("Loose equal ==:", user?.verifyCode == code)
-console.log("=======================")
+
 
 
     if (!user) {
@@ -45,7 +38,14 @@ console.log("=======================")
         },
       );
     }
-
+  console.log("=== CODE COMPARISON ===")
+console.log("DB code:", user?.verifyCode)
+console.log("DB code type:", typeof user?.verifyCode)
+console.log("Entered code:", code)
+console.log("Entered code type:", typeof code)
+console.log("Strict equal ===:", user?.verifyCode === code)
+console.log("Loose equal ==:", user?.verifyCode == code)
+console.log("=======================")
     const isCodeValid = user.verifyCode === code;
     const isCodeNotExpired = new Date(user.codeExpiration) > new Date();
 
