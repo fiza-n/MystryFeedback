@@ -69,6 +69,7 @@ export default function SignUpPage() {
         description: 'Welcome back!'
     })
    }
+   reset()
 
    if(result?.url) {
     router.replace('/dashboard');
